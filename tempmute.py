@@ -3,15 +3,17 @@ from pymongo import MongoClient
 import datetime
 from discord.ext import commands
 
-app = pymongo.MongoClient('mongo_link')
+app = MongoClient('mongo_link')
 db = app['Database']
+muteds = db['muteds']
+guilds = db['guilds']
 
 class Tempmute(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
     def check_log(self, guild):
-        guild = db.guilds.find_one({"_id": guild})
+        guild = guilds.find_one({"_id": guild})
         #checando se o modlog está ativado na guilda e se há um canal definido
         if guild['modlog'] == 1 and guild['modlog_ch'] != 'Nenhum':
             return True
@@ -40,14 +42,14 @@ class Tempmute(commands.Cog):
                 over = discord.PermissionOverwrite()
                 over.send_messages = False
                 await ch.set_permissions(overwrite=over, target=role)
-        m = db.muteds.find_one({'_id': member.id})
+        m = muteds.find_one({'_id': member.id})
         if m is None:
             #caso o membro não esteja na database, o bot irá mutá-lo
             guild = ctx.guild 
-            guild_db = db.guilds.find_one({"_id": guild.id})
+            guild_db = guilds.find_one({"_id": guild.id})
             embed = discord.Embed(timestamp=ctx.message.created_at)
             moderador = ctx.author
-            db.muteds.insert_one({'_id': member.id, 'guild': ctx.guild.id, 'role': role.id,
+            muteds.insert_one({'_id': member.id, 'guild': ctx.guild.id, 'role': role.id,
              'time': time * 60, 'timedelta': datetime.datetime.now() + datetime.timedelta(minutes=time)})
             await member.add_roles(role, reason=reason)
             await ctx.send(f'`{member}` foi mutado com sucesso')
