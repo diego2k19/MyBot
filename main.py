@@ -39,7 +39,7 @@ async def checar_mutes():
             role = guild.get_role(m['role'])
             member = guild.get_member(m['_id'])
             guild_db = guilds.find_one({"_id": guild.id})
-            embed = discord.Embed(timestamp=datetime.datetime.utcnow())
+            embed = discord.Embed(timestamp=datetime.datetime.now())
             embed.set_author(name=f'{guild.name} - [Unmute] | {member}',
                             icon_url=guild.icon_url)
             embed.set_footer(text=f'ID: {member.id}', icon_url=member.avatar_url)
