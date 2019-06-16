@@ -6,7 +6,8 @@ import datetime
 
 app = MongoClient("mongo_link")
 db = app['Database']
-collection = db['Collection']
+muteds = db['muteds']
+guilds = db['guilds']
 
 bot = commands.Bot(command_prefix='!')
 
@@ -23,7 +24,7 @@ async def on_ready():
           print(repr(e))
 
 def check_log(guild):
-    guild = db.guilds.find_one({"_id": guild})
+    guild = guilds.find_one({"_id": guild})
     #checando se o modlog está ativado na guilda e se há um canal definido
     if guild['modlog'] == 1 and guild['modlog_ch'] != 'Nenhum':
         return True
@@ -33,11 +34,11 @@ def check_log(guild):
 async def checar_mutes():
     await bot.wait_until_ready()
     while not bot.is_closed():
-        for m in collection.find():
+        for m in muteds.find():
             guild = bot.get_guild(m['guild'])
             role = guild.get_role(m['role'])
             member = guild.get_member(m['_id'])
-            guild_db = db.guilds.find_one({"_id": guild.id})
+            guild_db = guilds.find_one({"_id": guild.id})
             embed = discord.Embed(timestamp=datetime.datetime.utcnow())
             embed.set_author(name=f'{guild.name} - [Unmute] | {member}',
                             icon_url=guild.icon_url)
@@ -49,7 +50,7 @@ async def checar_mutes():
             #para que ele não fique mutado para sempre caso o bot reinicie antes do tempo acabar
             if (datetime.datetime.now()) >= (m['timedelta']):
                 await member.remove_roles(role)
-                mtds.delete_one({'_id': m['_id']})
+                muteds.delete_one({'_id': m['_id']})
                 if check_log(guild.id) is True:
                     await channel.send(embed=embed)
             #caso a condição acima não for atendida, o bot checará se o tempo em segundos até o mute
@@ -57,12 +58,12 @@ async def checar_mutes():
             #e atualizar na database
             elif m['time'] > 0:
                 newtime = ((m['timedelta']) - (datetime.datetime.now())).seconds
-                mtds.update_one({'_id': m['_id']}, {'$set': 
+                muteds.update_one({'_id': m['_id']}, {'$set': 
                 {'time': newtime}})
             #caso o tempo em segundos não for maior que zero, ele já irá desmutar o membro
             else:
                 await member.remove_roles(role)
-                mtds.delete_one({'_id': m['_id']})
+                muteds.delete_one({'_id': m['_id']})
                 if check_log(guild.id) is True:
                     await channel.send(embed=embed)
         await asyncio.sleep(1)
