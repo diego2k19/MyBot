@@ -10,7 +10,7 @@ collection = db['Collection']
 
 bot = commands.Bot(command_prefix='!')
 
-extensions = []
+extensions = ['tempmute']
 
 @bot.event
 async def on_ready():
