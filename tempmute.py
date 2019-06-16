@@ -23,10 +23,10 @@ class Tempmute(commands.Cog):
     @commands.command(usage='m!mute <@member> <tempo>(em minutos) <motivo>(opcional)')
     @commands.has_permissions(manage_guild=True)
     @commands.bot_has_permissions(manage_roles=True, manage_channels=True)
-    async def tempmute(self, ctx, member:discord.Member, time:int, *, reason:str='Nenhum'):
+    async def tempmute(self, ctx, member:discord.Member=None, time:int=None, *, reason:str='Nenhum'):
         #resolvendo possíveis erros
         if not member or not time:
-            return await ctx.send(f'O uso certo desse comando é {ctx.command.usage}')
+            return await ctx.send(f'O uso certo desse comando é `{ctx.command.usage}`')
         elif ctx.author == member:
             return await ctx.send('Você não pode mutar a si mesmo.')
         elif member.guild_permissions.administrator:
