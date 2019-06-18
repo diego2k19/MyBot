@@ -66,13 +66,13 @@ async def checar_mutes():
             channel = guild.get_channel(guild_db['modlog_ch'])
             member = guild.get_member(m['_id'])
             user = await bot.fetch_user(m['_id'])
+            embed = discord.Embed(timestamp=datetime.datetime.now())
+            embed.set_author(name=f'{guild.name} - [Unmute] | {user}',
+                            icon_url=guild.icon_url)
+            embed.set_footer(text=f'ID: {user.id}', icon_url=user.avatar_url)
+            embed.add_field(name='Membro', value=user.mention)
+            embed.add_field(name='Moderador', value=bot.user.mention)
             if member:
-                embed = discord.Embed(timestamp=datetime.datetime.now())
-                embed.set_author(name=f'{guild.name} - [Unmute] | {user}',
-                                icon_url=guild.icon_url)
-                embed.set_footer(text=f'ID: {user.id}', icon_url=user.avatar_url)
-                embed.add_field(name='Membro', value=user.mention)
-                embed.add_field(name='Moderador', value=bot.user.mention)
                 #checando se a data atual é maior ou igual a data em que o membro deveria ser desmutado
                 #para que ele não fique mutado para sempre caso o bot reinicie antes do tempo acabar
                 if (datetime.datetime.now()) >= (m['timedelta']):
