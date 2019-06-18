@@ -15,15 +15,20 @@ class Tempmute(commands.Cog):
     def check_log(self, guild):
         guild = guilds.find_one({"_id": guild})
         #checando se o modlog está ativado na guilda e se há um canal definido
-        if guild['modlog'] == 1 and guild['modlog_ch'] != 'Nenhum':
+        if guild['modlog'] and guild['modlog_ch']:
             return True
         else:
             return False
 
     @commands.command(usage='m!mute <@member> <tempo>(em minutos) <motivo>(opcional)')
     @commands.has_permissions(manage_guild=True)
+    #o autor precisará ter permissão de gerenciar servidor na guilda pra executar o comando
     @commands.bot_has_permissions(manage_roles=True, manage_channels=True)
+    #o bot precisará ter permissão de gerenciar cargos e canais na guilda pra executar o comando
     async def tempmute(self, ctx, member:discord.Member=None, time:int=None, *, reason:str='Nenhum'):
+        guild_db = guilds.find_one({"_id": ctx.guild.id})
+        if not guild_db:
+            return await ctx.send('Essa guilda não está registrada na minha database, por favor digite `!register` antes de usar esse comando')
         #resolvendo possíveis erros
         if not member or not time:
             return await ctx.send(f'O uso certo desse comando é `{ctx.command.usage}`')
@@ -46,11 +51,10 @@ class Tempmute(commands.Cog):
         if m is None:
             #caso o membro não esteja na database, o bot irá mutá-lo
             guild = ctx.guild 
-            guild_db = guilds.find_one({"_id": guild.id})
             embed = discord.Embed(timestamp=ctx.message.created_at)
             moderador = ctx.author
             muteds.insert_one({'_id': member.id, 'guild': ctx.guild.id, 'role': role.id,
-             'time': time * 60, 'timedelta': datetime.datetime.now() + datetime.timedelta(minutes=time)})
+                               'timedelta': datetime.datetime.now() + datetime.timedelta(minutes=time)})
             await member.add_roles(role, reason=reason)
             await ctx.send(f'`{member}` foi mutado com sucesso')
             embed.set_author(name=f'{guild.name} - [Mute] | {member}', 
