@@ -20,7 +20,7 @@ class Tempmute(commands.Cog):
         else:
             return False
 
-    @commands.command(usage='m!mute <@member> <tempo>(em minutos) <motivo>(opcional)')
+    @commands.command(usage='!mute <@member> <tempo>(em minutos) <motivo>(opcional)')
     @commands.has_permissions(manage_guild=True)
     #o autor precisará ter permissão de gerenciar servidor na guilda pra executar o comando
     @commands.bot_has_permissions(manage_roles=True, manage_channels=True)
